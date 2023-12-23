@@ -18,10 +18,26 @@ func main() {
 		os.Exit(1)
 	}
 
-    _, err = conn.Write([]byte("+PONG\r\n"))
-    if err != nil {
-		fmt.Println("Error sending pong: ", err.Error())
-		os.Exit(1)
+    data := make([]byte, 100)
+    for {
+        _, err = conn.Read(data)
+        if err != nil {
+            if err.Error() == "EOF" {
+                err = conn.Close();
+                if err != nil {
+                    fmt.Println("Error closing the connectiong: ", err.Error())
+                    os.Exit(1)
+                }
+                fmt.Println("Closing conn")
+                break;
+            }
+            fmt.Println("Error reading bytes: ", err.Error())
+            os.Exit(1)
+        }
+
+        if data[0] != 0 {
+            conn.Write([]byte("+PONG\r\n"))
+        }
     }
 
 }
